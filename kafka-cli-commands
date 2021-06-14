@@ -1,0 +1,78 @@
+
+
+
+
+
+
+## feeds the zsh environment with .bash_profile information
+echo source ~/.bash_profile > ~/.zshenv
+
+## starts zookeeper
+zookeeper-server-start.sh config/zookeeper.properties
+
+## starts kafka
+kafka-server-start.sh config/server.properties
+
+## create topics
+kafka-topics.sh --bootstrap-server imindloops-mbp.attlocal.net:9092 --topic 
+    secondTopic --create --partitions 4 --replication-factor 1
+
+## decribe topics
+kafka-topics.sh --zookeeper 127.0.0.1:2181 --topic secondTopic --describe
+
+## delete topics
+kafka-topics.sh --zookeeper 127.0.0.1:2181 --topic secondTopic --delete
+
+## List topics
+kafka-topics.sh --zookeeper 127.0.0.1:2181 --list
+
+## create a producer for the specified topic
+kafka-console-producer.sh --broker-list 127.0.0.1:9092 
+    --topic firstTopic
+
+## create a producer with an additional property setting the acknowledgment level
+kafka-console-producer.sh --broker-list 127.0.0.1:9092 --topic firstTopic --producer-property acks=all
+
+## create a coonsumer for a specified topic
+kafka-console-consumer.sh --bootstrap-server 127.0.0.1:9092 
+    --topic firstTopic
+
+## using the --from-beginning flag you can get all the messages in the topic
+## not only live messages
+kafka-console-consumer.sh --bootstrap-server 127.0.0.1:9092 
+--topic firstTopic --from-beginning
+
+## setting a kafka consumer in a group so members of this group can swarm the producer to consume its messages
+kafka-console-consumer --bootstrap-server 127.0.0.1:9092 --topic firstTopic --group firstTopicGroup
+
+NOTE: This command can be run multiple times to populate the consumer group, each time a new consumer is created in the specified group
+
+## commands to act over consumers like listing, describing, removing, see if there are any lagging messages, ip addresses of active consumer etc...
+kafka-consumer-groups
+
+## listing the consumer groups
+kafka-consumer-groups.sh --bootstrap-server localhost:9092 --list
+
+## describing consumer groups
+kafka-consumer-groups.sh --bootstrap-server localhost:9092 --describe --group firstTopicGroup 
+
+## how to reset offsets to the beginning by using --to-earliest
+kafka-consumer-groups.sh --bootstrap-server localhost:9092 --group firstTopicGroup --reset-offsets --to-earliest --execute --topic firstTopic
+
+## how to reset offsets to the beginning by using --shift-by which specifies if you want to move back or forward from the current offset, to move back
+## you have to specify negative numbers
+kafka-consumer-groups.sh --bootstrap-server localhost:9092 --group firstTopicGroup --reset-offsets --shift-by -2 --execute --topic firstTopic
+
+
+##USEFUL CLI OPTIONS
+    Producer with keys
+
+    kafka-console-producer --broker-list 127.0.0.1:9092 --topic first_topic --property parse.key=true --property key.separator=,
+    > key,value
+    > another key,another value
+
+    Consumer with keys
+
+    kafka-console-consumer --bootstrap-server 127.0.0.1:9092 --topic first_topic --from-beginning --property print.key=true --property key.separator=,
+
+
